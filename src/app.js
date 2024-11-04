@@ -96,10 +96,50 @@ setupForm.addEventListener("submit", (e) => {
     return [inputA.value.trim(), inputB.value.trim()];
   }).filter(([a, b]) => a !== "" && b !== "");
 
+  // Generate pairings
+  generatePairings();
   // Update URL with compressed state
   updateURLWithState(applicationState);
   renderAdminPage();
 });
+
+// Generate pairings function
+function generatePairings() {
+  const participants = [...applicationState.participants];
+  const disallowedPairs = new Set(applicationState.disallowedPairs.map(pair => pair.join(",")));
+  let pairings = [];
+  let retries = 0;
+
+  while (pairings.length !== participants.length && retries < 1000) {
+    pairings = [];
+    const remaining = [...participants];
+    let valid = true;
+
+    for (let i = 0; i < participants.length; i++) {
+      const giver = participants[i];
+      const possibleReceivers = remaining.filter(receiver => receiver !== giver && !disallowedPairs.has([giver, receiver].join(",")));
+
+      if (possibleReceivers.length === 0) {
+        valid = false;
+        retries++;
+        break;
+      }
+
+      const receiver = possibleReceivers[Math.floor(Math.random() * possibleReceivers.length)];
+      pairings.push({ giver, receiver });
+      remaining.splice(remaining.indexOf(receiver), 1);
+    }
+
+    if (valid) {
+      applicationState.pairings = pairings;
+      return;
+    }
+  }
+
+  if (retries >= 1000) {
+    alert("Unable to generate valid pairings after multiple attempts. Please adjust the participant list or disallowed pairs.");
+  }
+}
 
 // Render admin page
 function renderAdminPage() {
@@ -108,10 +148,10 @@ function renderAdminPage() {
   const pairingLinks = document.getElementById("pairing-links");
   pairingLinks.innerHTML = "";
 
-  applicationState.participants.forEach((participant, index) => {
+  applicationState.pairings.forEach((pair, index) => {
     const link = document.createElement("a");
     link.href = `#${index}`; // Placeholder, will eventually link to individual pairing page
-    link.textContent = `Link for ${participant}`;
+    link.textContent = `Link for ${pair.giver}`;
     pairingLinks.appendChild(link);
   });
 }
