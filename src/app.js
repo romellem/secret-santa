@@ -42,7 +42,7 @@ function loadStateFromURL() {
         return;
       }
       applicationState = JSON.parse(serialized);
-      renderAdminPage();
+      renderPage();
     });
   } catch (e) {
     console.error("Failed to decode base64 data: ", e);
@@ -104,8 +104,8 @@ setupForm.addEventListener("submit", (e) => {
   // Update URL with compressed state
   updateURLWithState(applicationState, (base64) => {
     window.location.hash = base64;
+    renderPage();
   });
-  renderAdminPage();
 });
 
 // Generate pairings function using graph theory and Hamiltonian path
@@ -165,6 +165,16 @@ function generatePairings() {
   }
 
   alert("Unable to generate valid pairings. Please adjust the participant list or disallowed pairs.");
+}
+
+// Render the appropriate page based on application state
+function renderPage() {
+  if (applicationState.participants.length === 0) {
+    document.getElementById("initial-form").classList.remove("hidden");
+    document.getElementById("admin-page").classList.add("hidden");
+  } else {
+    renderAdminPage();
+  }
 }
 
 // Render admin page
