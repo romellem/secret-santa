@@ -172,6 +172,9 @@ function renderPage() {
   if (applicationState.participants.length === 0) {
     document.getElementById("initial-form").classList.remove("hidden");
     document.getElementById("admin-page").classList.add("hidden");
+    document.getElementById("individual-page").classList.add("hidden");
+  } else if (window.location.hash.startsWith("#individual-")) {
+    renderIndividualPage();
   } else {
     renderAdminPage();
   }
@@ -181,17 +184,36 @@ function renderPage() {
 function renderAdminPage() {
   document.getElementById("initial-form").classList.add("hidden");
   document.getElementById("admin-page").classList.remove("hidden");
+  document.getElementById("individual-page").classList.add("hidden");
   const pairingLinks = document.getElementById("pairing-links");
   pairingLinks.innerHTML = "";
 
   if (applicationState.pairings) {
     applicationState.pairings.forEach((pair, index) => {
       const link = document.createElement("a");
-      link.href = `#${index}`; // Placeholder, will eventually link to individual pairing page
+      link.href = `#individual-${index}`;
       link.textContent = `Link for ${pair.giver}`;
       pairingLinks.appendChild(link);
     });
   }
+}
+
+// Render individual pairing page
+function renderIndividualPage() {
+  const index = parseInt(window.location.hash.split("-")[1], 10);
+  if (isNaN(index) || !applicationState.pairings || index >= applicationState.pairings.length) {
+    alert("Invalid pairing link.");
+    window.location.hash = "";
+    return;
+  }
+
+  const pair = applicationState.pairings[index];
+  document.getElementById("initial-form").classList.add("hidden");
+  document.getElementById("admin-page").classList.add("hidden");
+  document.getElementById("individual-page").classList.remove("hidden");
+
+  document.getElementById("person-name").textContent = pair.giver;
+  document.getElementById("pairing-name").textContent = pair.receiver;
 }
 
 // Load state from URL if available
