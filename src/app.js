@@ -16,7 +16,7 @@ function updateURLWithState(state) {
       return;
     }
     // Convert compressed byte array to Base64
-    const base64Data = btoa(String.fromCharCode.apply(null, compressed));
+    const base64Data = btoa(String.fromCharCode(...compressed));
     // Update the URL hash
     window.location.hash = base64Data;
   });
@@ -27,23 +27,23 @@ function loadStateFromURL() {
   const base64Data = window.location.hash.substring(1);
   if (!base64Data) return;
 
-  fetch("data:application/octet-stream;base64," + base64Data)
-    .then((r) => r.blob())
-    .then((blob) => {
-      const reader = new FileReader();
-      reader.onload = () => {
-        const compressed_data = Array.from(new Uint8Array(reader.result));
-        lzma.decompress(compressed_data, (serialized, error) => {
-          if (error) {
-            alert("Failed to decompress data: " + error);
-            return;
-          }
-          applicationState = JSON.parse(serialized);
-          renderAdminPage();
-        });
-      };
-      reader.readAsArrayBuffer(blob);
+  try {
+    const binaryString = atob(base64Data);
+    const compressed_data = new Uint8Array(binaryString.length);
+    for (let i = 0; i < binaryString.length; i++) {
+      compressed_data[i] = binaryString.charCodeAt(i);
+    }
+    lzma.decompress(compressed_data, (serialized, error) => {
+      if (error) {
+        alert("Failed to decompress data: " + error);
+        return;
+      }
+      applicationState = JSON.parse(serialized);
+      renderAdminPage();
     });
+  } catch (e) {
+    console.error("Failed to decode base64 data: ", e);
+  }
 }
 
 // Handle adding participants
@@ -94,7 +94,7 @@ setupForm.addEventListener("submit", (e) => {
   applicationState.disallowedPairs = Array.from(disallowedInputs).map((pair) => {
     const [inputA, inputB] = pair.querySelectorAll(".disallowed-input");
     return [inputA.value.trim(), inputB.value.trim()];
-  }).filter(([a, b]) => a !== "" && b !== "");
+  }).filter(([a, b]) => a !== "" && b !== "" && a !== b);
 
   // Generate pairings
   generatePairings();
@@ -169,12 +169,14 @@ function renderAdminPage() {
   const pairingLinks = document.getElementById("pairing-links");
   pairingLinks.innerHTML = "";
 
-  applicationState.pairings.forEach((pair, index) => {
-    const link = document.createElement("a");
-    link.href = `#${index}`; // Placeholder, will eventually link to individual pairing page
-    link.textContent = `Link for ${pair.giver}`;
-    pairingLinks.appendChild(link);
-  });
+  if (applicationState.pairings) {
+    applicationState.pairings.forEach((pair, index) => {
+      const link = document.createElement("a");
+      link.href = `#${index}`; // Placeholder, will eventually link to individual pairing page
+      link.textContent = `Link for ${pair.giver}`;
+      pairingLinks.appendChild(link);
+    });
+  }
 }
 
 // Load state from URL if available
