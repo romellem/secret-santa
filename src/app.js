@@ -8,17 +8,20 @@ let applicationState = {
 };
 
 // Utility function to compress state and update URL
-function updateURLWithState(state) {
+function updateURLWithState(state, callback) {
   const data = JSON.stringify(state);
   lzma.compress(data, 1, (compressed, error) => {
     if (error) {
       console.error("Compression error: ", error);
       return;
     }
-    // Convert compressed byte array to Base64
-    const base64Data = btoa(String.fromCharCode(...compressed));
-    // Update the URL hash
-    window.location.hash = base64Data;
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      const base64 = reader.result.substr(reader.result.indexOf(",") + 1);
+      callback(base64);
+    };
+    reader.readAsDataURL(new Blob([new Uint8Array(compressed)]));
   });
 }
 
@@ -99,7 +102,9 @@ setupForm.addEventListener("submit", (e) => {
   // Generate pairings
   generatePairings();
   // Update URL with compressed state
-  updateURLWithState(applicationState);
+  updateURLWithState(applicationState, (base64) => {
+    window.location.hash = base64;
+  });
   renderAdminPage();
 });
 
