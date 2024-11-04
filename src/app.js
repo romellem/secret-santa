@@ -116,7 +116,7 @@ setupForm.addEventListener("submit", (e) => {
   }
 });
 
-// Generate pairings function using graph theory and Hamiltonian path
+// Generate pairings function using graph theory and Hamiltonian path with random neighbor selection and backtracking
 function generatePairings(participants, disallowedPairs) {
   const disallowedSet = new Set(disallowedPairs.map(pair => pair.join(",")));
 
@@ -134,13 +134,16 @@ function generatePairings(participants, disallowedPairs) {
     });
   });
 
-  // Find a Hamiltonian path using Depth-First Search (DFS)
+  // Find a Hamiltonian path using Depth-First Search (DFS) with random neighbor selection and backtracking
   function findHamiltonianPath(node, visited, path) {
     if (path.length === participants.length) {
       return path;
     }
 
-    for (const neighbor of graph.get(node)) {
+    const neighbors = [...graph.get(node)];
+    shuffleArray(neighbors); // Randomize the order of neighbors
+
+    for (const neighbor of neighbors) {
       if (!visited.has(neighbor)) {
         visited.add(neighbor);
         path.push(neighbor);
@@ -155,6 +158,13 @@ function generatePairings(participants, disallowedPairs) {
       }
     }
     return null;
+  }
+
+  function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [array[i], array[j]] = [array[j], array[i]];
+    }
   }
 
   for (const startNode of participants) {
