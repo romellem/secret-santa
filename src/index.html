@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Secret Santa</title>
+  <link rel="stylesheet" href="styles.css">
+  <script defer src="lzma.js"></script>
+  <script defer src="app.js"></script>
+</head>
+<body>
+  <div id="app">
+    <!-- Initial State: Form for Adding Participants -->
+    <div id="initial-form" class="page">
+      <h1>Secret Santa Setup</h1>
+      <form id="setup-form">
+        <div id="participants-container">
+          <label>Enter participant names:</label>
+          <div id="participant-list">
+            <input type="text" class="participant-input" placeholder="Name" />
+          </div>
+          <button type="button" id="add-participant-button">Add Another Participant</button>
+        </div>
+        <div id="disallowed-container">
+          <label>Enter disallowed pairings:</label>
+          <div id="disallowed-list">
+            <div class="disallowed-pair">
+              <input type="text" class="disallowed-input" placeholder="Person A" />
+              <input type="text" class="disallowed-input" placeholder="Person B" />
+            </div>
+          </div>
+          <button type="button" id="add-disallowed-button">Add Another Pairing</button>
+        </div>
+        <button type="submit" id="generate-pairs-button">Generate Pairs</button>
+      </form>
+    </div>
+    
+    <!-- Admin Page: Displays Pairing Links -->
+    <div id="admin-page" class="page hidden">
+      <h1>Secret Santa Admin Page</h1>
+      <ul id="pairing-links">
+        <!-- Links to individual pairings will be inserted here -->
+      </ul>
+    </div>
+
+    <!-- Individual Pairing Page: Shows Pairing Result -->
+    <div id="individual-page" class="page hidden">
+      <h1>Secret Santa Pairing</h1>
+      <p id="individual-name">Hello, <span id="person-name"></span>!</p>
+      <p>You will be giving a gift to <span id="pairing-name"></span>.</p>
+    </div>
+  </div>
+</body>
+</html>
