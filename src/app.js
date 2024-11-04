@@ -195,23 +195,18 @@ function renderAdminPage() {
   pairingLinks.innerHTML = "";
 
   if (applicationState.pairings) {
-    applicationState.pairings.forEach(([giver, receiver], index) => {
-      const link = document.createElement("a");
-      link.href = `#pairing-${index}`;
-      link.textContent = `Link for ${giver}`;
-      link.addEventListener("click", (e) => {
-        e.preventDefault();
-        applicationState = {
-          page: "pairing",
-          giver,
-          receiver
-        };
-        updateURLWithState(applicationState, (base64) => {
-          window.location.hash = base64;
-          renderPage();
-        });
+    applicationState.pairings.forEach(([giver, receiver]) => {
+      const pairingState = {
+        page: "pairing",
+        giver,
+        receiver
+      };
+      updateURLWithState(pairingState, (base64) => {
+        const link = document.createElement("a");
+        link.href = `#${base64}`;
+        link.textContent = `Link for ${giver}`;
+        pairingLinks.appendChild(link);
       });
-      pairingLinks.appendChild(link);
     });
   }
 }
