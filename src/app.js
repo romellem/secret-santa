@@ -103,42 +103,63 @@ setupForm.addEventListener("submit", (e) => {
   renderAdminPage();
 });
 
-// Generate pairings function
+// Generate pairings function using graph theory and Hamiltonian path
 function generatePairings() {
   const participants = [...applicationState.participants];
   const disallowedPairs = new Set(applicationState.disallowedPairs.map(pair => pair.join(",")));
-  let pairings = [];
-  let retries = 0;
 
-  while (pairings.length !== participants.length && retries < 1000) {
-    pairings = [];
-    const remaining = [...participants];
-    let valid = true;
+  // Build graph representation
+  const graph = new Map();
+  participants.forEach(participant => {
+    graph.set(participant, []);
+  });
 
-    for (let i = 0; i < participants.length; i++) {
-      const giver = participants[i];
-      const possibleReceivers = remaining.filter(receiver => receiver !== giver && !disallowedPairs.has([giver, receiver].join(",")));
-
-      if (possibleReceivers.length === 0) {
-        valid = false;
-        retries++;
-        break;
+  participants.forEach(participant => {
+    participants.forEach(other => {
+      if (participant !== other && !disallowedPairs.has([participant, other].join(","))) {
+        graph.get(participant).push(other);
       }
+    });
+  });
 
-      const receiver = possibleReceivers[Math.floor(Math.random() * possibleReceivers.length)];
-      pairings.push({ giver, receiver });
-      remaining.splice(remaining.indexOf(receiver), 1);
+  // Find a Hamiltonian path using Depth-First Search (DFS)
+  function findHamiltonianPath(node, visited, path) {
+    if (path.length === participants.length) {
+      return path;
     }
 
-    if (valid) {
-      applicationState.pairings = pairings;
+    for (const neighbor of graph.get(node)) {
+      if (!visited.has(neighbor)) {
+        visited.add(neighbor);
+        path.push(neighbor);
+
+        const result = findHamiltonianPath(neighbor, visited, path);
+        if (result) {
+          return result;
+        }
+
+        visited.delete(neighbor);
+        path.pop();
+      }
+    }
+    return null;
+  }
+
+  for (const startNode of participants) {
+    const visited = new Set([startNode]);
+    const path = [startNode];
+    const result = findHamiltonianPath(startNode, visited, path);
+    if (result) {
+      // Create pairings from the Hamiltonian path
+      applicationState.pairings = result.map((giver, index) => {
+        const receiver = result[(index + 1) % result.length];
+        return { giver, receiver };
+      });
       return;
     }
   }
 
-  if (retries >= 1000) {
-    alert("Unable to generate valid pairings after multiple attempts. Please adjust the participant list or disallowed pairs.");
-  }
+  alert("Unable to generate valid pairings. Please adjust the participant list or disallowed pairs.");
 }
 
 // Render admin page
