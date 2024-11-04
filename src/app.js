@@ -54,7 +54,9 @@ addParticipantButton.addEventListener("click", () => {
   newInput.type = "text";
   newInput.className = "participant-input";
   newInput.placeholder = "Name";
+  const newLine = document.createElement("br");
   participantList.appendChild(newInput);
+  participantList.appendChild(newLine);
 });
 
 // Handle adding disallowed pairings
