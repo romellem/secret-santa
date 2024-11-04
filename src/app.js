@@ -3,6 +3,7 @@ const lzma = new LZMA("lzma_worker.js");
 
 // Application state
 let applicationState = {
+  page: "setup",
   participants: [],
   disallowedPairs: []
 };
@@ -101,6 +102,7 @@ setupForm.addEventListener("submit", (e) => {
 
   // Generate pairings
   generatePairings();
+  applicationState.page = "admin";
   // Update URL with compressed state
   updateURLWithState(applicationState, (base64) => {
     window.location.hash = base64;
@@ -169,13 +171,13 @@ function generatePairings() {
 
 // Render the appropriate page based on application state
 function renderPage() {
-  if (applicationState.participants.length === 0) {
+  if (applicationState.page === "setup") {
     document.getElementById("initial-form").classList.remove("hidden");
     document.getElementById("admin-page").classList.add("hidden");
     document.getElementById("individual-page").classList.add("hidden");
-  } else if (window.location.hash.startsWith("#individual-")) {
+  } else if (applicationState.page === "pairing") {
     renderIndividualPage();
-  } else {
+  } else if (applicationState.page === "admin") {
     renderAdminPage();
   }
 }
@@ -193,6 +195,12 @@ function renderAdminPage() {
       const link = document.createElement("a");
       link.href = `#individual-${index}`;
       link.textContent = `Link for ${pair.giver}`;
+      link.addEventListener("click", () => {
+        applicationState.page = "pairing";
+        updateURLWithState(applicationState, (base64) => {
+          window.location.hash = base64;
+        });
+      });
       pairingLinks.appendChild(link);
     });
   }
