@@ -116,7 +116,7 @@ setupForm.addEventListener("submit", (e) => {
   }
 });
 
-// Generate pairings function using graph theory and Hamiltonian path with random neighbor selection and backtracking
+// Generate pairings function using graph theory and Hamiltonian path with random neighbor selection and proper backtracking
 function generatePairings(participants, disallowedPairs) {
   const disallowedSet = new Set(disallowedPairs.map(pair => pair.join(",")));
 
@@ -134,7 +134,7 @@ function generatePairings(participants, disallowedPairs) {
     });
   });
 
-  // Find a Hamiltonian path using Depth-First Search (DFS) with random neighbor selection and backtracking
+  // Find a Hamiltonian path using Depth-First Search (DFS) with random neighbor selection and proper backtracking
   function findHamiltonianPath(node, visited, path) {
     if (path.length === participants.length) {
       return path;
@@ -153,6 +153,7 @@ function generatePairings(participants, disallowedPairs) {
           return result;
         }
 
+        // Backtrack
         visited.delete(neighbor);
         path.pop();
       }
@@ -167,6 +168,7 @@ function generatePairings(participants, disallowedPairs) {
     }
   }
 
+  // Try to find a Hamiltonian cycle by attempting from different starting nodes
   for (const startNode of participants) {
     const visited = new Set([startNode]);
     const path = [startNode];
