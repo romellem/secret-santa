@@ -2,10 +2,9 @@
 const lzma = new LZMA("lzma_worker.js");
 
 // Application state
+/** @type {Object} */
 let applicationState = {
-  page: "setup",
-  participants: [],
-  disallowedPairs: []
+  page: "setup"
 };
 
 // Utility function to compress state and update URL
@@ -89,31 +88,37 @@ setupForm.addEventListener("submit", (e) => {
 
   // Collect participants
   const participantInputs = document.querySelectorAll(".participant-input");
-  applicationState.participants = Array.from(participantInputs)
+  const participants = Array.from(participantInputs)
     .map((input) => input.value.trim())
     .filter((name) => name !== "");
 
   // Collect disallowed pairs
   const disallowedInputs = document.querySelectorAll(".disallowed-pair");
-  applicationState.disallowedPairs = Array.from(disallowedInputs).map((pair) => {
+  const disallowedPairs = Array.from(disallowedInputs).map((pair) => {
     const [inputA, inputB] = pair.querySelectorAll(".disallowed-input");
     return [inputA.value.trim(), inputB.value.trim()];
   }).filter(([a, b]) => a !== "" && b !== "" && a !== b);
 
   // Generate pairings
-  generatePairings();
-  applicationState.page = "admin";
-  // Update URL with compressed state
-  updateURLWithState(applicationState, (base64) => {
-    window.location.hash = base64;
-    renderPage();
-  });
+  const pairings = generatePairings(participants, disallowedPairs);
+  if (pairings) {
+    applicationState = {
+      page: "admin",
+      participants,
+      disallowedPairs,
+      pairings
+    };
+    // Update URL with compressed state
+    updateURLWithState(applicationState, (base64) => {
+      window.location.hash = base64;
+      renderPage();
+    });
+  }
 });
 
 // Generate pairings function using graph theory and Hamiltonian path
-function generatePairings() {
-  const participants = [...applicationState.participants];
-  const disallowedPairs = new Set(applicationState.disallowedPairs.map(pair => pair.join(",")));
+function generatePairings(participants, disallowedPairs) {
+  const disallowedSet = new Set(disallowedPairs.map(pair => pair.join(",")));
 
   // Build graph representation
   const graph = new Map();
@@ -123,7 +128,7 @@ function generatePairings() {
 
   participants.forEach(participant => {
     participants.forEach(other => {
-      if (participant !== other && !disallowedPairs.has([participant, other].join(","))) {
+      if (participant !== other && !disallowedSet.has([participant, other].join(","))) {
         graph.get(participant).push(other);
       }
     });
@@ -157,16 +162,15 @@ function generatePairings() {
     const path = [startNode];
     const result = findHamiltonianPath(startNode, visited, path);
     if (result) {
-      // Create pairings from the Hamiltonian path
-      applicationState.pairings = result.map((giver, index) => {
+      return result.map((giver, index) => {
         const receiver = result[(index + 1) % result.length];
-        return { giver, receiver };
+        return [giver, receiver];
       });
-      return;
     }
   }
 
   alert("Unable to generate valid pairings. Please adjust the participant list or disallowed pairs.");
+  return null;
 }
 
 // Render the appropriate page based on application state
@@ -191,14 +195,19 @@ function renderAdminPage() {
   pairingLinks.innerHTML = "";
 
   if (applicationState.pairings) {
-    applicationState.pairings.forEach((pair, index) => {
+    applicationState.pairings.forEach(([giver, receiver], index) => {
       const link = document.createElement("a");
-      link.href = `#individual-${index}`;
-      link.textContent = `Link for ${pair.giver}`;
+      link.href = `#`;
+      link.textContent = `Link for ${giver}`;
       link.addEventListener("click", () => {
-        applicationState.page = "pairing";
+        applicationState = {
+          page: "pairing",
+          giver,
+          receiver
+        };
         updateURLWithState(applicationState, (base64) => {
           window.location.hash = base64;
+          renderPage();
         });
       });
       pairingLinks.appendChild(link);
@@ -208,20 +217,12 @@ function renderAdminPage() {
 
 // Render individual pairing page
 function renderIndividualPage() {
-  const index = parseInt(window.location.hash.split("-")[1], 10);
-  if (isNaN(index) || !applicationState.pairings || index >= applicationState.pairings.length) {
-    alert("Invalid pairing link.");
-    window.location.hash = "";
-    return;
-  }
-
-  const pair = applicationState.pairings[index];
   document.getElementById("initial-form").classList.add("hidden");
   document.getElementById("admin-page").classList.add("hidden");
   document.getElementById("individual-page").classList.remove("hidden");
 
-  document.getElementById("person-name").textContent = pair.giver;
-  document.getElementById("pairing-name").textContent = pair.receiver;
+  document.getElementById("person-name").textContent = applicationState.giver;
+  document.getElementById("pairing-name").textContent = applicationState.receiver;
 }
 
 // Load state from URL if available
