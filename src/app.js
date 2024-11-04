@@ -197,9 +197,10 @@ function renderAdminPage() {
   if (applicationState.pairings) {
     applicationState.pairings.forEach(([giver, receiver], index) => {
       const link = document.createElement("a");
-      link.href = `#`;
+      link.href = `#pairing-${index}`;
       link.textContent = `Link for ${giver}`;
-      link.addEventListener("click", () => {
+      link.addEventListener("click", (e) => {
+        e.preventDefault();
         applicationState = {
           page: "pairing",
           giver,
