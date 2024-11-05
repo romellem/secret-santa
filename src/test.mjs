@@ -29,9 +29,9 @@ const disallowedPairsMap = disallowedPairs.reduce((map, [a, b]) => {
 //     ["Albert", "Hank"],
 //     ["Bob", "Brenda"], ["Charlie", "Cathy"], ["David", "Diane"], ["Eric", "Eve"], ["Frank", "Fiona"], ["George", "Gina"], ["Hank", "Helen"]];
 for (let i = 0; i < 1000000; i++) {
-    console.log(i, 'START ---------')
+    // console.log(i, 'START ---------')
     const pairings = generatePairings(participants, disallowedPairs);
-    console.log(i, 'END -----------')
+    // console.log(i, 'END -----------')
     for (let [a, b] of pairings) {
         if (disallowedPairsMap.get(a) === b) {
             console.log('Disallowed pair found:', a, b, `after`, i);

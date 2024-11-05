@@ -40,7 +40,7 @@ export function generatePairings(participants, disallowedPairs) {
       const visited = new Set([startNode]);
       const path = [startNode];
       const result = findHamiltonianPathWithBacktracking(startNode, visited, path);
-      if (result) {
+      if (result && isValidCycle(result)) {
         return result.map((giver, index) => {
           const receiver = result[(index + 1) % result.length];
           return [giver, receiver];
@@ -51,18 +51,15 @@ export function generatePairings(participants, disallowedPairs) {
   }
 
   function findHamiltonianPathWithBacktracking(node, visited, path) {
-    console.log('1. Checking', node, 'current path', path);
     if (path.length === participants.length) {
       return path;
     }
 
     const neighbors = [...graph.get(node)];
     shuffleArray(neighbors); // Randomize the order of neighbors
-    console.log('  2. Random order of neighboars', neighbors);
 
     for (const neighbor of neighbors) {
       if (!visited.has(neighbor)) {
-        console.log('    3. Trying', neighbor);
         visited.add(neighbor);
         path.push(neighbor);
 
@@ -79,11 +76,22 @@ export function generatePairings(participants, disallowedPairs) {
     return null;
   }
 
+  function isValidCycle(path) {
+    for (let i = 0; i < path.length; i++) {
+      const giver = path[i];
+      const receiver = path[(i + 1) % path.length];
+      if (disallowedMapOfSets.has(giver) && disallowedMapOfSets.get(giver).has(receiver)) {
+        return false;
+      }
+    }
+    return true;
+  }
+
   const cycle = findHamiltonianCycle();
   if (cycle) {
     return cycle;
   }
 
-  console.error("Unable to generate valid pairings. Please adjust the participant list or disallowed pairs.");
+  // alert("Unable to generate valid pairings. Please adjust the participant list or disallowed pairs.");
   return null;
 }
