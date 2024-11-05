@@ -51,16 +51,50 @@ export function generatePairings(participants, disallowedPairs) {
   }
 
   // Try to find a Hamiltonian cycle by attempting from different starting nodes
-  for (const startNode of participants) {
-    const visited = new Set([startNode]);
-    const path = [startNode];
-    const result = findHamiltonianPath(startNode, visited, path);
-    if (result) {
-      return result.map((giver, index) => {
-        const receiver = result[(index + 1) % result.length];
-        return [giver, receiver];
-      });
+  function findHamiltonianCycle() {
+    for (const startNode of participants) {
+      const visited = new Set([startNode]);
+      const path = [startNode];
+      const result = findHamiltonianPathWithBacktracking(startNode, visited, path);
+      if (result) {
+        return result.map((giver, index) => {
+          const receiver = result[(index + 1) % result.length];
+          return [giver, receiver];
+        });
+      }
     }
+    return null;
+  }
+
+  function findHamiltonianPathWithBacktracking(node, visited, path) {
+    if (path.length === participants.length) {
+      return path;
+    }
+
+    const neighbors = [...graph.get(node)];
+    shuffleArray(neighbors); // Randomize the order of neighbors
+
+    for (const neighbor of neighbors) {
+      if (!visited.has(neighbor)) {
+        visited.add(neighbor);
+        path.push(neighbor);
+
+        const result = findHamiltonianPathWithBacktracking(neighbor, visited, path);
+        if (result) {
+          return result;
+        }
+
+        // Backtrack
+        visited.delete(neighbor);
+        path.pop();
+      }
+    }
+    return null;
+  }
+
+  const cycle = findHamiltonianCycle();
+  if (cycle) {
+    return cycle;
   }
 
   alert("Unable to generate valid pairings. Please adjust the participant list or disallowed pairs.");
