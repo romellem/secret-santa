@@ -1,6 +1,17 @@
 // Generate pairings function using graph theory and Hamiltonian path with random neighbor selection and proper backtracking
 export function generatePairings(participants, disallowedPairs) {
-  const disallowedSet = new Set(disallowedPairs.map(pair => [pair[0], pair[1]].sort().join(",")));
+  // Create disallowedMapOfSets
+  const disallowedMapOfSets = new Map();
+  disallowedPairs.forEach(([a, b]) => {
+    if (!disallowedMapOfSets.has(a)) {
+      disallowedMapOfSets.set(a, new Set());
+    }
+    if (!disallowedMapOfSets.has(b)) {
+      disallowedMapOfSets.set(b, new Set());
+    }
+    disallowedMapOfSets.get(a).add(b);
+    disallowedMapOfSets.get(b).add(a);
+  });
 
   // Build graph representation
   const graph = new Map();
@@ -10,7 +21,7 @@ export function generatePairings(participants, disallowedPairs) {
 
   participants.forEach(participant => {
     participants.forEach(other => {
-      if (participant !== other && !disallowedSet.has([participant, other].sort().join(","))) {
+      if (participant !== other && (!disallowedMapOfSets.has(participant) || !disallowedMapOfSets.get(participant).has(other))) {
         graph.get(participant).push(other);
       }
     });
@@ -70,6 +81,6 @@ export function generatePairings(participants, disallowedPairs) {
     return cycle;
   }
 
-  console.error("Unable to generate valid pairings. Please adjust the participant list or disallowed pairs.");
+  alert("Unable to generate valid pairings. Please adjust the participant list or disallowed pairs.");
   return null;
 }
