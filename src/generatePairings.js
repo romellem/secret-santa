@@ -51,15 +51,18 @@ export function generatePairings(participants, disallowedPairs) {
   }
 
   function findHamiltonianPathWithBacktracking(node, visited, path) {
+    console.log('1. Checking', node, 'current path', path);
     if (path.length === participants.length) {
       return path;
     }
 
     const neighbors = [...graph.get(node)];
     shuffleArray(neighbors); // Randomize the order of neighbors
+    console.log('  2. Random order of neighboars', neighbors);
 
     for (const neighbor of neighbors) {
       if (!visited.has(neighbor)) {
+        console.log('    3. Trying', neighbor);
         visited.add(neighbor);
         path.push(neighbor);
 
@@ -81,6 +84,6 @@ export function generatePairings(participants, disallowedPairs) {
     return cycle;
   }
 
-  alert("Unable to generate valid pairings. Please adjust the participant list or disallowed pairs.");
+  console.error("Unable to generate valid pairings. Please adjust the participant list or disallowed pairs.");
   return null;
 }
