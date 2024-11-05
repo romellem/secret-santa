@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Secret Santa</title>
   <link rel="stylesheet" href="styles.css">
-  <script defer src="lzma.js"></script>
-  <script defer src="app.js"></script>
+  <script src="lzma.js"></script>
+  <script type="module" src="app.js"></script>
 </head>
 <body>
   <div id="app">
@@ -16,11 +16,10 @@
       <form id="setup-form">
         <div id="participants-container">
           <label>Enter participant names:</label>
-          <button type="button" id="add-participant-button">Add Another Participant</button>
-
           <div id="participant-list">
             <input type="text" class="participant-input" placeholder="Name" />
           </div>
+          <button type="button" id="add-participant-button">Add Another Participant</button>
         </div>
         <div id="disallowed-container">
           <label>Enter disallowed pairings:</label>
