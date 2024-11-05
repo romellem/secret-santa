@@ -50,25 +50,16 @@ export function generatePairings(participants, disallowedPairs) {
 
   function findHamiltonianPathWithBacktracking(node, visited, path) {
     if (path.length === participants.length) {
+      if (!isValidCycle(path)) {
+        return null;
+      }
       return path;
     }
 
-    const unvisitedNeighbors = graph.get(node).filter(neighbor => {
-      return !visited.has(neighbor)
-  });
-    shuffleArray(unvisitedNeighbors);
+    const neighbors = [...graph.get(node)];
+    shuffleArray(neighbors); // Randomize the order of neighbors
 
-    for (const neighbor of unvisitedNeighbors) {
-      visited.add(neighbor);
-      path.push(neighbor);
-      const neighborVisited = new Set();
-      const result = findHamiltonianPathWithBacktracking(neighbor, neighborVisited, path);
-      if (result) {
-        return result;
-      }
-
-      // Otherwise, 
-
+    for (const neighbor of neighbors) {
       if (!visited.has(neighbor)) {
         visited.add(neighbor);
         path.push(neighbor);
@@ -83,8 +74,6 @@ export function generatePairings(participants, disallowedPairs) {
         path.pop();
       }
     }
-
-    // If we are here, we have to backtrack
     return null;
   }
 
