@@ -37,7 +37,7 @@ export function generatePairings(participants, disallowedPairs) {
   function findHamiltonianCycle() {
     const node = participants[0];
     const path = [node];
-    const visited = new Set();
+    const visited = new Set(path);
     const result = findHamiltonianPathWithBacktracking(node, visited, path);
     if (result) {
       return result.map((giver, index) => {
