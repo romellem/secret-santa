@@ -1,16 +1,28 @@
+function buildDisallowedMap(disallowedPairs) {
+  const disallowedMap = new Map();
+  for (const [a, b] of disallowedPairs) {
+    if (!disallowedMap.has(a)) {
+      disallowedMap.set(a, new Set());
+    }
+    if (!disallowedMap.has(b)) {
+      disallowedMap.set(b, new Set());
+    }
+    disallowedMap.get(a).add(b);
+    disallowedMap.get(b).add(a);
+  }
+  return disallowedMap;
+}
+
+function isAllowedPair(disallowedMap, a, b) {
+  return !(disallowedMap.has(a) && disallowedMap.get(a).has(b));
+}
+
 // Generate pairings function using graph theory and Hamiltonian path with random neighbor selection and proper backtracking
 export function generatePairings(participants, disallowedPairs) {
-  const disallowedMapOfSets = new Map();
-  for (let [a, b] of disallowedPairs) {
-    if (!disallowedMapOfSets.has(a)) {
-      disallowedMapOfSets.set(a, new Set());
-    }
-    if (!disallowedMapOfSets.has(b)) {
-      disallowedMapOfSets.set(b, new Set());
-    }
-    disallowedMapOfSets.get(a).add(b);
-    disallowedMapOfSets.get(b).add(a);
+  if (participants.length < 2) {
+    return null;
   }
+  const disallowedMapOfSets = buildDisallowedMap(disallowedPairs);
 
   // Build graph representation
   const graph = new Map();
@@ -20,7 +32,7 @@ export function generatePairings(participants, disallowedPairs) {
 
   participants.forEach(participant => {
     participants.forEach(other => {
-      if (participant !== other && (!disallowedMapOfSets.has(participant) || !disallowedMapOfSets.get(participant).has(other))) {
+      if (participant !== other && isAllowedPair(disallowedMapOfSets, participant, other)) {
         graph.get(participant).push(other);
       }
     });
@@ -95,4 +107,51 @@ export function generatePairings(participants, disallowedPairs) {
 
   // alert("Unable to generate valid pairings. Please adjust the participant list or disallowed pairs.");
   return null;
+}
+
+export function countHamiltonianCycles(participants, disallowedPairs) {
+  const n = participants.length;
+  if (n < 2) {
+    return 0n;
+  }
+
+  const disallowedMap = buildDisallowedMap(disallowedPairs);
+  const allowed = Array.from({ length: n }, () => Array(n).fill(false));
+  for (let i = 0; i < n; i++) {
+    for (let j = 0; j < n; j++) {
+      if (i === j) continue;
+      allowed[i][j] = isAllowedPair(disallowedMap, participants[i], participants[j]);
+    }
+  }
+
+  const start = 0;
+  const size = 1 << n;
+  const dp = Array.from({ length: size }, () => Array(n).fill(0n));
+  dp[1 << start][start] = 1n;
+
+  for (let mask = 0; mask < size; mask++) {
+    if ((mask & (1 << start)) === 0) {
+      continue;
+    }
+    for (let current = 0; current < n; current++) {
+      if ((mask & (1 << current)) === 0) continue;
+      const ways = dp[mask][current];
+      if (ways === 0n) continue;
+      for (let next = 0; next < n; next++) {
+        if ((mask & (1 << next)) !== 0) continue;
+        if (!allowed[current][next]) continue;
+        dp[mask | (1 << next)][next] += ways;
+      }
+    }
+  }
+
+  let totalCycles = 0n;
+  const fullMask = size - 1;
+  for (let end = 1; end < n; end++) {
+    if (allowed[end][start]) {
+      totalCycles += dp[fullMask][end];
+    }
+  }
+
+  return totalCycles;
 }

@@ -106,6 +106,12 @@ button:disabled:hover {
   margin-bottom: 12px;
 }
 
+#cycle-count {
+  margin: 8px 0 12px;
+  font-weight: bold;
+  color: #2e7d32;
+}
+
 a {
   display: block;
   margin: 5px 0;

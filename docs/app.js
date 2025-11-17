@@ -1,4 +1,4 @@
-import { generatePairings } from './generatePairings.js';
+import { generatePairings, countHamiltonianCycles } from './generatePairings.js';
 
 // Initialize LZMA
 const lzma = new LZMA("lzma_worker.js");
@@ -53,6 +53,7 @@ function loadStateFromURL() {
 
 const participantList = document.getElementById("participant-list");
 const errorMessageElement = document.getElementById("error-message");
+const cycleCountElement = document.getElementById("cycle-count");
 
 // Enable the generate button only when enough participants are entered
 const generatePairsButton = document.getElementById("generate-pairs-button");
@@ -74,6 +75,17 @@ function clearError() {
 function showError(message) {
   errorMessageElement.textContent = message;
   errorMessageElement.classList.remove("hidden");
+}
+
+function updateCycleCountDisplay() {
+  if (!cycleCountElement) return;
+  if (applicationState.cycleCount) {
+    cycleCountElement.textContent = `Possible valid cycles: ${applicationState.cycleCount}`;
+    cycleCountElement.classList.remove("hidden");
+  } else {
+    cycleCountElement.textContent = "";
+    cycleCountElement.classList.add("hidden");
+  }
 }
 
 // Handle adding participants
@@ -132,11 +144,14 @@ setupForm.addEventListener("submit", (e) => {
   // Generate pairings
   const pairings = generatePairings(participants, disallowedPairs);
   if (pairings) {
+    const cycleCountBigInt = countHamiltonianCycles(participants, disallowedPairs);
+    const cycleCountString = cycleCountBigInt.toString();
     applicationState = {
       page: "admin",
       participants,
       disallowedPairs,
-      pairings
+      pairings,
+      cycleCount: cycleCountString
     };
     // Update URL with compressed state
     updateURLWithState(applicationState, (base64) => {
@@ -144,7 +159,12 @@ setupForm.addEventListener("submit", (e) => {
       renderPage();
     });
   } else {
-    showError("Unable to generate a valid cycle. Try removing a restriction or adding another participant.");
+    const totalCycles = countHamiltonianCycles(participants, disallowedPairs);
+    if (totalCycles === 0n) {
+      showError("Unable to generate a valid cycle. Try removing a restriction or adding another participant.");
+    } else {
+      showError("Something went wrong while generating pairings. Please try again.");
+    }
   }
 });
 
@@ -184,6 +204,7 @@ function renderAdminPage() {
       });
     });
   }
+  updateCycleCountDisplay();
 }
 
 const regenerateButton = document.getElementById("regenerate-button");
@@ -194,9 +215,11 @@ if (regenerateButton) {
     }
     const newPairings = generatePairings(applicationState.participants, applicationState.disallowedPairs || []);
     if (newPairings) {
+      const cycleCountString = applicationState.cycleCount || countHamiltonianCycles(applicationState.participants, applicationState.disallowedPairs || []).toString();
       applicationState = {
         ...applicationState,
-        pairings: newPairings
+        pairings: newPairings,
+        cycleCount: cycleCountString
       };
       updateURLWithState(applicationState, (base64) => {
         window.location.hash = base64;
