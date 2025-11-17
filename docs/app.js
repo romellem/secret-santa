@@ -8,6 +8,7 @@ const lzma = new LZMA("lzma_worker.js");
 let applicationState = {
   page: "setup"
 };
+let adminRenderVersion = 0;
 
 // Utility function to compress state and update URL
 function updateURLWithState(state, callback) {
@@ -191,6 +192,7 @@ function renderPage() {
 
 // Render admin page
 function renderAdminPage() {
+  const currentRenderVersion = ++adminRenderVersion;
   document.getElementById("initial-form").classList.add("hidden");
   document.getElementById("admin-page").classList.remove("hidden");
   document.getElementById("individual-page").classList.add("hidden");
@@ -205,6 +207,9 @@ function renderAdminPage() {
         receiver
       };
       updateURLWithState(pairingState, (base64) => {
+        if (currentRenderVersion !== adminRenderVersion) {
+          return;
+        }
         const link = document.createElement("a");
         link.href = `#${base64}`;
         link.textContent = `Link for ${giver}`;
