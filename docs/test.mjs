@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { generatePairings, countHamiltonianCycles } from './generatePairings.js';
+import { generatePairings, countHamiltonianCycles } from './js/generatePairings.js';
 
 function createDisallowedSet(disallowedPairs) {
   const set = new Set();
