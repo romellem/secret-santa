@@ -143,3 +143,8 @@ a:hover {
   margin-bottom: 0;
   font-weight: bold;
 }
+
+#person-name,
+#pairing-name {
+  font-weight: bold;
+}
