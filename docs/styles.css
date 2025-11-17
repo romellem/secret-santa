@@ -148,3 +148,9 @@ a:hover {
 #pairing-name {
   font-weight: bold;
 }
+
+#pairing-name {
+  display: block;
+  font-size: 1.4em;
+  margin-top: 10px;
+}
