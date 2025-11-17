@@ -102,6 +102,10 @@ button:disabled:hover {
   margin-top: 16px;
 }
 
+#regenerate-button {
+  margin-bottom: 12px;
+}
+
 a {
   display: block;
   margin: 5px 0;

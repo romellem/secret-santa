@@ -186,6 +186,28 @@ function renderAdminPage() {
   }
 }
 
+const regenerateButton = document.getElementById("regenerate-button");
+if (regenerateButton) {
+  regenerateButton.addEventListener("click", () => {
+    if (!applicationState.participants || applicationState.participants.length < 2) {
+      return;
+    }
+    const newPairings = generatePairings(applicationState.participants, applicationState.disallowedPairs || []);
+    if (newPairings) {
+      applicationState = {
+        ...applicationState,
+        pairings: newPairings
+      };
+      updateURLWithState(applicationState, (base64) => {
+        window.location.hash = base64;
+        renderAdminPage();
+      });
+    } else {
+      alert("Unable to generate a new valid cycle. Try adjusting the disallowed pairings.");
+    }
+  });
+}
+
 // Render individual pairing page
 function renderIndividualPage() {
   document.getElementById("initial-form").classList.add("hidden");
