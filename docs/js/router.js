@@ -1,12 +1,15 @@
 import { getApplicationState } from "./state.js";
 import { renderAdminPage } from "./pages/adminPage.js";
-import { renderIndividualPage } from "./pages/individualPage.js";
+import { renderIndividualPage, clearIndividualPageEffects } from "./pages/individualPage.js";
 
 function showPage(pageId) {
   document.getElementById("initial-form").classList.add("hidden");
   document.getElementById("admin-page").classList.add("hidden");
   document.getElementById("individual-page").classList.add("hidden");
   document.getElementById(pageId).classList.remove("hidden");
+  if (pageId !== "individual-page") {
+    clearIndividualPageEffects();
+  }
 }
 
 export function renderCurrentPage() {
