@@ -159,16 +159,23 @@ a:hover {
   position: absolute;
   width: 6px;
   height: 6px;
-  background-color: rgba(255, 0, 255, 0.85);
+  background-color: rgba(255, 255, 255, 0.85);
   border-radius: 50%;
   box-shadow: 0 0 6px rgba(0, 0, 0, 0.25);
-  transform: translate3d(0, -10vh, 0);
   animation: fall linear forwards;
 }
 
 @keyframes fall {
+  from {
+    transform: translate3d(var(--drift-start, 0px), -10vh, 0);
+    opacity: 0.9;
+  }
+  50% {
+    transform: translate3d(var(--drift-mid, 10px), 50vh, 0);
+    opacity: 0.8;
+  }
   to {
-    transform: translate3d(0, 110vh, 0);
+    transform: translate3d(var(--drift-end, -10px), 110vh, 0);
     opacity: 0;
   }
 }

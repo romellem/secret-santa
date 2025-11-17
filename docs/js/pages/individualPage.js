@@ -33,6 +33,11 @@ function startSnow() {
     snowflake.style.animationDuration = `${duration}s`;
     snowflake.style.animationDelay = `${delay}s`;
     snowflake.style.opacity = `${Math.random() * 0.5 + 0.35}`;
+    const driftOffset = Math.random() * 20 + 10;
+    const direction = Math.random() > 0.5 ? 1 : -1;
+    snowflake.style.setProperty("--drift-start", `${direction * -driftOffset}px`);
+    snowflake.style.setProperty("--drift-mid", `${direction * driftOffset}px`);
+    snowflake.style.setProperty("--drift-end", `${direction * -driftOffset}px`);
     container.appendChild(snowflake);
     setTimeout(() => snowflake.remove(), (duration + delay) * 1000);
   };
