@@ -157,26 +157,39 @@ a:hover {
 
 .snowflake {
   position: absolute;
-  width: 6px;
-  height: 6px;
-  background-color: rgba(255, 255, 255, 0.85);
+  animation: drift var(--drift-duration, 6s) ease-in-out infinite;
+}
+
+.snowflake span {
+  display: block;
+  width: var(--flake-size, 6px);
+  height: var(--flake-size, 6px);
+  background-color: rgba(255, 255, 255, 0.9);
   border-radius: 50%;
   box-shadow: 0 0 6px rgba(0, 0, 0, 0.25);
-  animation: fall linear forwards;
+  animation: fall var(--fall-duration, 8s) linear forwards;
+  opacity: 0.9;
 }
 
 @keyframes fall {
   from {
-    transform: translate3d(var(--drift-start, 0px), -10vh, 0);
-    opacity: 0.9;
-  }
-  50% {
-    transform: translate3d(var(--drift-mid, 10px), 50vh, 0);
-    opacity: 0.8;
+    transform: translate3d(0, -10vh, 0);
   }
   to {
-    transform: translate3d(var(--drift-end, -10px), 110vh, 0);
+    transform: translate3d(0, 110vh, 0);
     opacity: 0;
+  }
+}
+
+@keyframes drift {
+  0% {
+    transform: translateX(calc(-1 * var(--drift-distance, 12px)));
+  }
+  50% {
+    transform: translateX(var(--drift-distance, 12px));
+  }
+  100% {
+    transform: translateX(calc(-1 * var(--drift-distance, 12px)));
   }
 }
 

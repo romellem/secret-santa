@@ -23,23 +23,28 @@ function startSnow() {
     }
     const snowflake = document.createElement("div");
     snowflake.className = "snowflake";
+    const inner = document.createElement("span");
+    snowflake.appendChild(inner);
+
     const startLeft = Math.random() * 100;
     const size = Math.random() * 4 + 4;
-    const duration = Math.random() * 6 + 6;
-    const delay = Math.random() * 2;
+    const fallDuration = Math.random() * 6 + 6;
+    const driftDuration = Math.random() * 4 + 4;
+    const driftDistance = Math.random() * 20 + 10;
+    const phaseOffset = Math.random() * fallDuration;
+
     snowflake.style.left = `${startLeft}%`;
-    snowflake.style.width = `${size}px`;
-    snowflake.style.height = `${size}px`;
-    snowflake.style.animationDuration = `${duration}s`;
-    snowflake.style.animationDelay = `${delay}s`;
-    snowflake.style.opacity = `${Math.random() * 0.5 + 0.35}`;
-    const driftOffset = Math.random() * 20 + 10;
-    const direction = Math.random() > 0.5 ? 1 : -1;
-    snowflake.style.setProperty("--drift-start", `${direction * -driftOffset}px`);
-    snowflake.style.setProperty("--drift-mid", `${direction * driftOffset}px`);
-    snowflake.style.setProperty("--drift-end", `${direction * -driftOffset}px`);
+    snowflake.style.setProperty("--drift-duration", `${driftDuration}s`);
+    snowflake.style.setProperty("--drift-distance", `${driftDistance}px`);
+    snowflake.style.animationDelay = `-${phaseOffset}s`;
+
+    inner.style.setProperty("--flake-size", `${size}px`);
+    inner.style.setProperty("--fall-duration", `${fallDuration}s`);
+    inner.style.animationDelay = `-${phaseOffset}s`;
+
     container.appendChild(snowflake);
-    setTimeout(() => snowflake.remove(), (duration + delay) * 1000);
+    const remaining = Math.max(fallDuration - (phaseOffset % fallDuration), 0.2);
+    setTimeout(() => snowflake.remove(), remaining * 1000);
   };
 
   for (let i = 0; i < MAX_SNOWFLAKES; i++) {
