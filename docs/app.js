@@ -79,8 +79,16 @@ function showError(message) {
 
 function updateCycleCountDisplay() {
   if (!cycleCountElement) return;
-  if (applicationState.cycleCount) {
-    cycleCountElement.textContent = `Possible valid cycles: ${applicationState.cycleCount}`;
+  let cycleCountValue = applicationState.cycleCount;
+
+  if (!cycleCountValue && applicationState.pairings && (applicationState.participants?.length ?? 0) >= 2) {
+    const recomputed = countHamiltonianCycles(applicationState.participants, applicationState.disallowedPairs || []);
+    cycleCountValue = recomputed.toString();
+    applicationState.cycleCount = cycleCountValue;
+  }
+
+  if (cycleCountValue) {
+    cycleCountElement.textContent = `Possible valid cycles: ${cycleCountValue}`;
     cycleCountElement.classList.remove("hidden");
   } else {
     cycleCountElement.textContent = "";
