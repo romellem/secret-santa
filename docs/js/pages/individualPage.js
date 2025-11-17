@@ -9,25 +9,41 @@ function renderEmojiRow(elementId) {
 }
 
 let snowIntervalId = null;
+const MAX_SNOWFLAKES = 80;
 
 function startSnow() {
   stopSnow();
   const container = document.getElementById("snow-container");
   if (!container) return;
 
-  snowIntervalId = setInterval(() => {
+  const createSnowflake = () => {
+    if (!container) return;
+    if (container.childElementCount >= MAX_SNOWFLAKES) {
+      return;
+    }
     const snowflake = document.createElement("div");
     snowflake.className = "snowflake";
     const startLeft = Math.random() * 100;
-    const size = Math.random() * 3 + 3;
-    const duration = Math.random() * 4 + 4;
+    const size = Math.random() * 4 + 4;
+    const duration = Math.random() * 6 + 6;
+    const delay = Math.random() * 2;
     snowflake.style.left = `${startLeft}%`;
     snowflake.style.width = `${size}px`;
     snowflake.style.height = `${size}px`;
     snowflake.style.animationDuration = `${duration}s`;
+    snowflake.style.animationDelay = `${delay}s`;
+    snowflake.style.opacity = `${Math.random() * 0.5 + 0.35}`;
     container.appendChild(snowflake);
-    setTimeout(() => snowflake.remove(), duration * 1000);
-  }, 600);
+    setTimeout(() => snowflake.remove(), (duration + delay) * 1000);
+  };
+
+  for (let i = 0; i < MAX_SNOWFLAKES; i++) {
+    setTimeout(createSnowflake, Math.random() * 2000);
+  }
+
+  snowIntervalId = setInterval(() => {
+    createSnowflake();
+  }, 400);
 }
 
 function stopSnow() {
