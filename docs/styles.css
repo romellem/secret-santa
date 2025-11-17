@@ -131,6 +131,13 @@ a:hover {
 }
 
 /* Messaging */
+#pairing-emoji-top,
+#pairing-emoji-bottom {
+  font-size: 1.6em;
+  margin: 6px auto 10px;
+  text-align: center;
+}
+
 #cycle-count {
   margin: 8px 0 12px;
   font-weight: bold;
