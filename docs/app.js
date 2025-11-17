@@ -200,3 +200,4 @@ function renderIndividualPage() {
 
 // Load state from URL if available
 window.addEventListener("load", loadStateFromURL);
+window.addEventListener("hashchange", loadStateFromURL);
