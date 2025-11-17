@@ -51,10 +51,23 @@ function loadStateFromURL() {
   }
 }
 
+const participantList = document.getElementById("participant-list");
+
+// Enable the generate button only when enough participants are entered
+const generatePairsButton = document.getElementById("generate-pairs-button");
+function getParticipantNames() {
+  return Array.from(document.querySelectorAll(".participant-input"))
+    .map((input) => input.value.trim())
+    .filter((name) => name !== "");
+}
+function updateGenerateButtonState() {
+  const uniqueParticipantCount = new Set(getParticipantNames()).size;
+  generatePairsButton.disabled = uniqueParticipantCount < 2;
+}
+
 // Handle adding participants
 const addParticipantButton = document.getElementById("add-participant-button");
 addParticipantButton.addEventListener("click", () => {
-  const participantList = document.getElementById("participant-list");
   const newInput = document.createElement("input");
   newInput.type = "text";
   newInput.className = "participant-input";
@@ -62,7 +75,12 @@ addParticipantButton.addEventListener("click", () => {
   const newLine = document.createElement("br");
   participantList.appendChild(newInput);
   participantList.appendChild(newLine);
+  newInput.addEventListener("input", updateGenerateButtonState);
+  updateGenerateButtonState();
 });
+
+participantList.addEventListener("input", updateGenerateButtonState);
+updateGenerateButtonState();
 
 // Handle adding disallowed pairings
 const addDisallowedButton = document.getElementById("add-disallowed-button");
