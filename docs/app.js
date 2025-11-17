@@ -52,6 +52,7 @@ function loadStateFromURL() {
 }
 
 const participantList = document.getElementById("participant-list");
+const errorMessageElement = document.getElementById("error-message");
 
 // Enable the generate button only when enough participants are entered
 const generatePairsButton = document.getElementById("generate-pairs-button");
@@ -63,6 +64,16 @@ function getParticipantNames() {
 function updateGenerateButtonState() {
   const uniqueParticipantCount = new Set(getParticipantNames()).size;
   generatePairsButton.disabled = uniqueParticipantCount < 2;
+}
+
+function clearError() {
+  errorMessageElement.textContent = "";
+  errorMessageElement.classList.add("hidden");
+}
+
+function showError(message) {
+  errorMessageElement.textContent = message;
+  errorMessageElement.classList.remove("hidden");
 }
 
 // Handle adding participants
@@ -105,6 +116,7 @@ addDisallowedButton.addEventListener("click", () => {
 const setupForm = document.getElementById("setup-form");
 setupForm.addEventListener("submit", (e) => {
   e.preventDefault();
+  clearError();
 
   // Collect participants
   const participantInputs = document.querySelectorAll(".participant-input");
@@ -133,6 +145,8 @@ setupForm.addEventListener("submit", (e) => {
       window.location.hash = base64;
       renderPage();
     });
+  } else {
+    showError("Unable to generate a valid cycle. Try removing a restriction or adding another participant.");
   }
 });
 
