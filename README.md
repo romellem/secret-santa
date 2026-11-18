@@ -1,7 +1,7 @@
 # Secret Santa
 
 This is a project I wanted to make to create a bare-bones "[secret santa][1]" web application,
-**and** heavily rely on LLMs. I first made this application in 2024 using [ChatGPT 4o+Canvas][2] and then improved it in 2025 using [OpenAI Codex gpt-5.1-codex][7].
+**and** heavily rely on LLMs. I first made this application in 2024 using [ChatGPT 4o+Canvas][2], then improved it in 2025 using [OpenAI Codex gpt-5.1-codex][7], and again in 2026 with [GPT-6.1 Terra (high)][8]
 
 I originally documented this in 2024, and kept that below. Afterwards I wrote some new thoughts around how this went in 2025.
 
@@ -59,9 +59,9 @@ Here was my initial prompt to kick things off:
 > - I will use hash params (or query params if you think that would be better?) to store the application state.
 > - The aid with size and obscure the application state, the params will be compressed with LZMA-JS (I'll give more details on this later).
 > - The site will load in a "starting" state, which will be:
->   - A form to add people to my list
->   - Some fields to allow for selecting people that are disallowed from being secret santa partners (e.g., my brother and his wife shouldn't be paired, so I'll need a mechanism in the UI to set this behavior).
->   - After entering in the data, a button to submit the form and generate the pairs
+>     - A form to add people to my list
+>     - Some fields to allow for selecting people that are disallowed from being secret santa partners (e.g., my brother and his wife shouldn't be paired, so I'll need a mechanism in the UI to set this behavior).
+>     - After entering in the data, a button to submit the form and generate the pairs
 > - After submitting the form, it will compute the pairs using an algorithm that makes sure we don't have any "simple" loops (e.g. Tom gives a gift to Sarah, and Sarah gives a gift to Tom), and follows the disallow list from before
 > - This then gives an "admin" page, which shows all the people entered before, and a unique URL to send to that person with their pairing
 > - The idea on the admin page is I won't know who the algorithm chose. The URLs have their state compressed, so it obscures the pairings
@@ -140,29 +140,52 @@ Some things I still didn't like
 
 - I asked it to add some animating snow to the "individual pages" and it did terribly. I had to greatly guide it. Finally I realized that when it was trying to animate a percentage-based `transformY`, that meant it'd be translating the height _of the snowflake,_ not translating it across the height of the page. Things like this I'd expect the LLMs to know.
 - Maybe it's Open AI, but I have a hard time still fully groking the code it spit out. I am not seeing an overall "organizational structure" to things. Maybe it is the lack of code comments? It is little things. Like in the `main.js` file, it has
-    
     ```js
     async function loadStateFromURL() {
-      const stateFromURL = await readStateFromHash();
-      if (stateFromURL) {
-        replaceApplicationState(stateFromURL);
-      }
-      renderCurrentPage();
+        const stateFromURL = await readStateFromHash();
+        if (stateFromURL) {
+            replaceApplicationState(stateFromURL);
+        }
+        renderCurrentPage();
     }
-    
+
     initSetupPage();
     initAdminPage();
-    
+
     window.addEventListener("load", loadStateFromURL);
     window.addEventListener("hashchange", loadStateFromURL);
     ```
-    
+
     - If this site has 3 pages (setup, admin, and individual), why does it only have `initSetupPage` and `initAdminPage`?
         - When you look into each of these, you see those functions are mostly setting up event handlers, and since the Individual page doesn't have any inputs, that's why it doesn't have a function for that. But that is arbitrary. A better named function would have been `initEventListeners()` and handle all pages, or maybe that could have called `initEventListenersSetupPage()` and `initEventListenersAdminPage()`. Those event listeners too depending on the HTML structure. Namely, that the controls already exist on the page but are just hidden. That is an important implementation detail that I'd leave a comment for. The LLM didn't think to remark on that.
     - Why a `load` and `hashchange` listener? The `hashchange` was needed to fix a bug and make the admin page work more like an SPA, but you'd never know that by just looking at the code.
     - Why make `loadStateFromURL` impure? This function should be split in two - one that reads the state from the URL and returns it as a new value, and one that takes in that state as an argument and hydrates the local state and renders the page (e.g. 2nd one should be _pure_).
 - Overall, the code still seems very disjointed and "junior." Although things moved way faster now, and the quality has increased, I wouldn't trust this to build any serious business.
 
+## 2026 Thoughts
+
+A full year with "agentic workflows." At this point, this whole thing is a breeze for claude/codex and the latest models.
+
+<details>
+
+<summary>View the initial prompt for this 2026 improvements</summary>
+
+> I want to update this application. The main thing I want to include is an image when I send the link in an imessage. I know this site is static so I'm assuming there is no way to dynamically generate this from the URL unless I had some serverside processing in place. So instead of that, I'm thinking that we change how this application works.
+>
+> - Rather than this being an SPA, make separate pages for the admin, setup, and individual pages.
+> - For this specific year, and to accomodate og images, create a script to generate the og image. This will create a new page with the person's name so the URL is easy to identify. For example, running the script with the input 'matt' will generate a n/matt/index.html file (somewhere) that has the og image with "Matt" name included.
+> - So on the admin page, after inputting the names and generating the links, also include "special" links with those names. Include a little bit about "generate the pages ahead of time to use the special links." If the special link is not made, a generic link can be used.
+> - Check the styles of the site and zhuzh it up a bit. Make it festive, fun, but don't make it unusable or difficult to read. Overall just freshen it up.
+> - Refactor the CSS to use more modern features. CSS Variables, nesting, etc. Anything iOS 26 would support. Overall make the CSS more readable and better organized for us to slightly change next year.
+> - See how we are compressing the overall state into the URL. If there is room for improvement there, apply it. I kind of remember the URLs being really long, and ideally it would be a tad bit shorter. Also maybe with real pages we can drop the #hash params and replace with ?query params since those look a bit nicer in the URL bar I think.
+>
+> Ask me any questions before you get started. Otherwise afterward, move forward on completing those items. Commit your work as you go along, committing in logical chunks as you complete the work.
+
+</details>
+
+The changes it made were nice. As you can see above, I didn't tell it how to generate the image but it ended up using the local version of `swift` on my machine (I think?) to make the image, which ends up looking nice. My first thought was using `npx playwright` or something but the `.m` file is probably simpler.
+
+Wild times. It honestly is hard to envision what the future will look like next year with the models, or how it can improve for projects like this, really.
 
 [1]: https://en.wikipedia.org/wiki/Secret_Santa
 [2]: https://openai.com/index/introducing-canvas/
@@ -171,3 +194,4 @@ Some things I still didn't like
 [5]: https://github.com/romellem/secret-santa/commit/8e23b0f2e89aef6f30af1f1c016b69cf1a668f78
 [6]: https://github.com/features/copilot
 [7]: https://openai.com/index/introducing-codex/
+[8]: https://openai.com/index/introducing-gpt-6-1-terra/
