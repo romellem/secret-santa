@@ -2,6 +2,7 @@ import { stateURL } from "../urlState.js";
 import { generatePairings, countHamiltonianCycles } from "../generatePairings.js";
 
 const participantList = document.getElementById("participant-list");
+const participantSuggestions = document.getElementById("participant-suggestions");
 const disallowedList = document.getElementById("disallowed-list");
 const setupForm = document.getElementById("setup-form");
 const addParticipantButton = document.getElementById("add-participant-button");
@@ -38,6 +39,15 @@ function updateGenerateButtonState() {
   generatePairsButton.disabled = uniqueParticipantCount < 2;
 }
 
+function updateParticipantSuggestions() {
+  const options = [...new Set(getParticipantNames())].map((name) => {
+    const option = document.createElement("option");
+    option.value = name;
+    return option;
+  });
+  participantSuggestions.replaceChildren(...options);
+}
+
 function createParticipantInput() {
   const input = document.createElement("input");
   input.type = "text";
@@ -54,6 +64,7 @@ function createDisallowedPairFields() {
     input.type = "text";
     input.className = "disallowed-input";
     input.placeholder = placeholder;
+    input.setAttribute("list", "participant-suggestions");
     pairDiv.appendChild(input);
   });
   return pairDiv;
@@ -108,6 +119,8 @@ export function initSetupPage() {
   });
 
   participantList.addEventListener("input", updateGenerateButtonState);
+  participantList.addEventListener("input", updateParticipantSuggestions);
   setupForm.addEventListener("submit", handleFormSubmit);
   updateGenerateButtonState();
+  updateParticipantSuggestions();
 }

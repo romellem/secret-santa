@@ -11,10 +11,11 @@
         </div>
         <div id="disallowed-container">
           <label>Enter disallowed pairings:</label>
+          <datalist id="participant-suggestions"></datalist>
           <div id="disallowed-list">
             <div class="disallowed-pair">
-              <input type="text" class="disallowed-input" placeholder="Person A" />
-              <input type="text" class="disallowed-input" placeholder="Person B" />
+              <input type="text" class="disallowed-input" placeholder="Person A" list="participant-suggestions" />
+              <input type="text" class="disallowed-input" placeholder="Person B" list="participant-suggestions" />
             </div>
           </div>
           <button type="button" id="add-disallowed-button">Add Another Pairing</button>
