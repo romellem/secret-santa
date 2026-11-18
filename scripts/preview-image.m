@@ -24,7 +24,7 @@ int main(int argc, const char *argv[]) { @autoreleasepool {
   NSColor *cream = [NSColor colorWithRed:1 green:.97 blue:.88 alpha:1];
   NSColor *gold = [NSColor colorWithRed:.92 green:.79 blue:.54 alpha:1];
   NSArray *lines = @[@"✦   MERRY CHRISTMAS   ✦", @"Secret Santa", [@"for " stringByAppendingString:name.length > 30 ? [[name substringToIndex:27] stringByAppendingString:@"…"] : name]];
-  CGFloat sizes[] = {29, 82, name.length > 18 ? 52 : 72}; CGFloat ys[] = {460,315,210};
+  CGFloat sizes[] = {29, 82, name.length > 18 ? 52 : 72}; CGFloat ys[] = {397,252,147};
   for (int i=0; i<3; i++) [lines[i] drawInRect:NSMakeRect(135,ys[i],995,sizes[i]*1.6) withAttributes:@{NSFontAttributeName:[NSFont systemFontOfSize:sizes[i] weight:i==1 ? NSFontWeightBold : NSFontWeightMedium], NSForegroundColorAttributeName:i==0 ? gold : cream, NSParagraphStyleAttributeName:style}];
   [image unlockFocus];
   NSBitmapImageRep *bitmap = [NSBitmapImageRep imageRepWithData:image.TIFFRepresentation];
