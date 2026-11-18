@@ -1,8 +1,13 @@
 #import <AppKit/AppKit.h>
 int main(int argc, const char *argv[]) { @autoreleasepool {
   NSString *name = [NSString stringWithUTF8String:argv[1]];
-  NSImage *image = [[NSImage alloc] initWithSize:NSMakeSize(1200, 630)];
-  [image lockFocus];
+  // Draw into a fixed pixel buffer so Retina displays don't double the output size.
+  NSBitmapImageRep *bitmap = [[NSBitmapImageRep alloc]
+    initWithBitmapDataPlanes:NULL pixelsWide:1200 pixelsHigh:630 bitsPerSample:8
+    samplesPerPixel:4 hasAlpha:YES isPlanar:NO colorSpaceName:NSDeviceRGBColorSpace
+    bytesPerRow:0 bitsPerPixel:0];
+  [NSGraphicsContext saveGraphicsState];
+  [NSGraphicsContext setCurrentContext:[NSGraphicsContext graphicsContextWithBitmapImageRep:bitmap]];
   [[NSColor colorWithRed:.07 green:.24 blue:.20 alpha:1] setFill]; NSRectFill(NSMakeRect(0,0,1200,630));
   // A reproducible, subtle paper grain keeps every generated tag consistent.
   uint32_t seed = 2026;
@@ -26,7 +31,6 @@ int main(int argc, const char *argv[]) { @autoreleasepool {
   NSArray *lines = @[@"✦   MERRY CHRISTMAS   ✦", @"Secret Santa", [@"for " stringByAppendingString:name.length > 30 ? [[name substringToIndex:27] stringByAppendingString:@"…"] : name]];
   CGFloat sizes[] = {29, 82, name.length > 18 ? 52 : 72}; CGFloat ys[] = {397,252,147};
   for (int i=0; i<3; i++) [lines[i] drawInRect:NSMakeRect(135,ys[i],995,sizes[i]*1.6) withAttributes:@{NSFontAttributeName:[NSFont systemFontOfSize:sizes[i] weight:i==1 ? NSFontWeightBold : NSFontWeightMedium], NSForegroundColorAttributeName:i==0 ? gold : cream, NSParagraphStyleAttributeName:style}];
-  [image unlockFocus];
-  NSBitmapImageRep *bitmap = [NSBitmapImageRep imageRepWithData:image.TIFFRepresentation];
+  [NSGraphicsContext restoreGraphicsState];
   [[bitmap representationUsingType:NSBitmapImageFileTypePNG properties:@{}] writeToFile:[NSString stringWithUTF8String:argv[2]] atomically:YES];
 } return 0; }
