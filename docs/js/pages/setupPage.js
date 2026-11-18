@@ -1,6 +1,4 @@
-import { replaceApplicationState, getApplicationState } from "../state.js";
-import { writeStateToHash } from "../urlState.js";
-import { renderCurrentPage } from "../router.js";
+import { stateURL } from "../urlState.js";
 import { generatePairings, countHamiltonianCycles } from "../generatePairings.js";
 
 const participantList = document.getElementById("participant-list");
@@ -61,24 +59,25 @@ function createDisallowedPairFields() {
   return pairDiv;
 }
 
-async function persistStateAndRender(state) {
-  replaceApplicationState(state);
-  await writeStateToHash(getApplicationState());
-  renderCurrentPage();
-}
-
 async function handleFormSubmit(event) {
   event.preventDefault();
   clearError();
 
   const participants = getParticipantNames();
   const disallowedPairs = getDisallowedPairs();
+  if (new Set(participants).size !== participants.length) {
+    showError("Each participant needs a unique name.");
+    return;
+  }
+  if (disallowedPairs.some(pair => pair.some(name => !participants.includes(name)))) {
+    showError("Each restriction must use names from the participant list.");
+    return;
+  }
   const pairings = generatePairings(participants, disallowedPairs);
 
   if (pairings) {
     const cycleCount = countHamiltonianCycles(participants, disallowedPairs).toString();
-    await persistStateAndRender({
-      page: "admin",
+    window.location.href = await stateURL("admin/", {
       participants,
       disallowedPairs,
       pairings,

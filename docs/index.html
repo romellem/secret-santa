@@ -1,18 +1,6 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Secret Santa</title>
-  <link rel="stylesheet" href="styles.css">
-  <script src="vendor/lzma.js"></script>
-  <script type="module" src="js/main.js"></script>
-</head>
-<body>
-  <div id="app">
-    <!-- Initial State: Form for Adding Participants -->
-    <div id="initial-form" class="page">
-      <h1>Secret Santa Setup</h1>
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Secret Santa</title><link rel="stylesheet" href="styles.css"><script src="vendor/lzma.js"></script><script type="module" src="js/setup.js"></script></head><body><main id="app">    <div id="initial-form" class="card">
+      <p class="eyebrow">A little holiday magic ✦</p><h1>Let’s play Secret Santa</h1><p>Gather your people, set the ground rules, and let the elves do the rest.</p>
       <form id="setup-form">
         <div id="participants-container">
           <label>Enter participant names:</label>
@@ -36,25 +24,4 @@
       </form>
     </div>
     
-    <!-- Admin Page: Displays Pairing Links -->
-    <div id="admin-page" class="page hidden">
-      <h1>Secret Santa Admin Page</h1>
-      <button type="button" id="regenerate-button">Regenerate Pairings</button>
-      <p id="cycle-count" class="hidden"></p>
-      <ul id="pairing-links">
-        <!-- Links to individual pairings will be inserted here -->
-      </ul>
-    </div>
-
-    <!-- Individual Pairing Page: Shows Pairing Result -->
-    <div id="individual-page" class="page hidden">
-      <div id="snow-container" aria-hidden="true"></div>
-      <div id="pairing-emoji-top" aria-hidden="true" class="pairing-emoji">🎄 🎁 ❄️</div>
-      <h1>Secret Santa Pairing</h1>
-      <p id="individual-name">Hello, <span id="person-name"></span>!</p>
-      <p>You will be giving a gift to <span id="pairing-name"></span></p>
-      <div id="pairing-emoji-bottom" aria-hidden="true" class="pairing-emoji">🎄 🎁 ❄️</div>
-    </div>
-  </div>
-</body>
-</html>
+</main></body></html>
