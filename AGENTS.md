@@ -1,0 +1,4 @@
+- This is a simple static website for a "secret santa" give away.
+- While anyone can use this public site, in reality the audience is very small, probably just the creator and their family. Because of this, you don't need to worry about "backwards compatbility" when making changes to this app from one year to the next.
+- Strive for simplicity and native features rather than frameworks or prebuilt solutions.
+- The application should be fun!

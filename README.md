@@ -5,6 +5,24 @@ This is a project I wanted to make to create a bare-bones "[secret santa][1]" we
 
 I originally documented this in 2024, and kept that below. Afterwards I wrote some new thoughts around how this went in 2025.
 
+## Running the draw
+
+Serve the `docs` directory with a static web server (for example, `python3 -m http.server --directory docs`) and open the site. Enter unique participant names and any restrictions, then save the admin page URL. Send each person their own link. Regenerating changes the draw and invalidates links you already sent, so generate the draw only once before sharing.
+
+The URL contains the draw in compressed form: it obscures the result but does not encrypt it. Anyone with the admin URL can recover the entire draw; keep it private.
+
+### Personalized iMessage previews
+
+Before sharing special links, generate and publish the corresponding pages from a Mac with Apple's command line tools installed:
+
+```sh
+node scripts/generate-pages.mjs "Matt" "Aunt Jane"
+```
+
+This creates `docs/n/matt/` and `docs/n/aunt-jane/`, each with an HTML page and a PNG preview. Commit and deploy those files before sending the special links from the admin page. The generated page contains only the giver's name, never their recipient. Names must produce distinct URL slugs; names with identical slugs need to be changed to distinguish them. Use the generic link if a page has not been generated.
+
+The preview's absolute URL defaults to `https://romellem.github.io/secret-santa/`. If the site is hosted elsewhere, set `SITE_URL` to its public base URL when generating pages. iMessage may cache previews, so changes to an already shared URL may take time to appear.
+
 ## 2024 Thoughts
 
 Overall, I'm feeling pretty _meh_ on the experience.

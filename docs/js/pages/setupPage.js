@@ -1,9 +1,8 @@
-import { replaceApplicationState, getApplicationState } from "../state.js";
-import { writeStateToHash } from "../urlState.js";
-import { renderCurrentPage } from "../router.js";
+import { stateURL } from "../urlState.js";
 import { generatePairings, countHamiltonianCycles } from "../generatePairings.js";
 
 const participantList = document.getElementById("participant-list");
+const participantSuggestions = document.getElementById("participant-suggestions");
 const disallowedList = document.getElementById("disallowed-list");
 const setupForm = document.getElementById("setup-form");
 const addParticipantButton = document.getElementById("add-participant-button");
@@ -40,6 +39,15 @@ function updateGenerateButtonState() {
   generatePairsButton.disabled = uniqueParticipantCount < 2;
 }
 
+function updateParticipantSuggestions() {
+  const options = [...new Set(getParticipantNames())].map((name) => {
+    const option = document.createElement("option");
+    option.value = name;
+    return option;
+  });
+  participantSuggestions.replaceChildren(...options);
+}
+
 function createParticipantInput() {
   const input = document.createElement("input");
   input.type = "text";
@@ -56,15 +64,10 @@ function createDisallowedPairFields() {
     input.type = "text";
     input.className = "disallowed-input";
     input.placeholder = placeholder;
+    input.setAttribute("list", "participant-suggestions");
     pairDiv.appendChild(input);
   });
   return pairDiv;
-}
-
-async function persistStateAndRender(state) {
-  replaceApplicationState(state);
-  await writeStateToHash(getApplicationState());
-  renderCurrentPage();
 }
 
 async function handleFormSubmit(event) {
@@ -73,12 +76,19 @@ async function handleFormSubmit(event) {
 
   const participants = getParticipantNames();
   const disallowedPairs = getDisallowedPairs();
+  if (new Set(participants).size !== participants.length) {
+    showError("Each participant needs a unique name.");
+    return;
+  }
+  if (disallowedPairs.some(pair => pair.some(name => !participants.includes(name)))) {
+    showError("Each restriction must use names from the participant list.");
+    return;
+  }
   const pairings = generatePairings(participants, disallowedPairs);
 
   if (pairings) {
     const cycleCount = countHamiltonianCycles(participants, disallowedPairs).toString();
-    await persistStateAndRender({
-      page: "admin",
+    window.location.href = await stateURL("admin/", {
       participants,
       disallowedPairs,
       pairings,
@@ -109,6 +119,8 @@ export function initSetupPage() {
   });
 
   participantList.addEventListener("input", updateGenerateButtonState);
+  participantList.addEventListener("input", updateParticipantSuggestions);
   setupForm.addEventListener("submit", handleFormSubmit);
   updateGenerateButtonState();
+  updateParticipantSuggestions();
 }
