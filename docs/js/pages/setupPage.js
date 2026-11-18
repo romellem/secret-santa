@@ -1,8 +1,13 @@
 import { stateURL } from "../urlState.js";
-import { generatePairings, countHamiltonianCycles } from "../generatePairings.js";
+import {
+    generatePairings,
+    countHamiltonianCycles,
+} from "../generatePairings.js";
 
 const participantList = document.getElementById("participant-list");
-const participantSuggestions = document.getElementById("participant-suggestions");
+const participantSuggestions = document.getElementById(
+    "participant-suggestions",
+);
 const disallowedList = document.getElementById("disallowed-list");
 const setupForm = document.getElementById("setup-form");
 const addParticipantButton = document.getElementById("add-participant-button");
@@ -11,116 +16,129 @@ const generatePairsButton = document.getElementById("generate-pairs-button");
 const errorMessageElement = document.getElementById("error-message");
 
 function getParticipantNames() {
-  return Array.from(document.querySelectorAll(".participant-input"))
-    .map((input) => input.value.trim())
-    .filter((name) => name !== "");
+    return Array.from(document.querySelectorAll(".participant-input"))
+        .map((input) => input.value.trim())
+        .filter((name) => name !== "");
 }
 
 function getDisallowedPairs() {
-  const pairs = Array.from(document.querySelectorAll(".disallowed-pair"));
-  return pairs.map((pair) => {
-    const [inputA, inputB] = pair.querySelectorAll(".disallowed-input");
-    return [inputA.value.trim(), inputB.value.trim()];
-  }).filter(([a, b]) => a !== "" && b !== "" && a !== b);
+    const pairs = Array.from(document.querySelectorAll(".disallowed-pair"));
+    return pairs
+        .map((pair) => {
+            const [inputA, inputB] = pair.querySelectorAll(".disallowed-input");
+            return [inputA.value.trim(), inputB.value.trim()];
+        })
+        .filter(([a, b]) => a !== "" && b !== "" && a !== b);
 }
 
 function clearError() {
-  errorMessageElement.textContent = "";
-  errorMessageElement.classList.add("hidden");
+    errorMessageElement.textContent = "";
+    errorMessageElement.classList.add("hidden");
 }
 
 function showError(message) {
-  errorMessageElement.textContent = message;
-  errorMessageElement.classList.remove("hidden");
+    errorMessageElement.textContent = message;
+    errorMessageElement.classList.remove("hidden");
 }
 
 function updateGenerateButtonState() {
-  const uniqueParticipantCount = new Set(getParticipantNames()).size;
-  generatePairsButton.disabled = uniqueParticipantCount < 2;
+    const uniqueParticipantCount = new Set(getParticipantNames()).size;
+    generatePairsButton.disabled = uniqueParticipantCount < 2;
 }
 
 function updateParticipantSuggestions() {
-  const options = [...new Set(getParticipantNames())].map((name) => {
-    const option = document.createElement("option");
-    option.value = name;
-    return option;
-  });
-  participantSuggestions.replaceChildren(...options);
+    const options = [...new Set(getParticipantNames())].map((name) => {
+        const option = document.createElement("option");
+        option.value = name;
+        return option;
+    });
+    participantSuggestions.replaceChildren(...options);
 }
 
 function createParticipantInput() {
-  const input = document.createElement("input");
-  input.type = "text";
-  input.className = "participant-input";
-  input.placeholder = "Name";
-  return input;
+    const input = document.createElement("input");
+    input.type = "text";
+    input.className = "participant-input";
+    input.placeholder = "Name";
+    return input;
 }
 
 function createDisallowedPairFields() {
-  const pairDiv = document.createElement("div");
-  pairDiv.className = "disallowed-pair";
-  ["Person A", "Person B"].forEach((placeholder) => {
-    const input = document.createElement("input");
-    input.type = "text";
-    input.className = "disallowed-input";
-    input.placeholder = placeholder;
-    input.setAttribute("list", "participant-suggestions");
-    pairDiv.appendChild(input);
-  });
-  return pairDiv;
+    const pairDiv = document.createElement("div");
+    pairDiv.className = "disallowed-pair";
+    ["Person A", "Person B"].forEach((placeholder) => {
+        const input = document.createElement("input");
+        input.type = "text";
+        input.className = "disallowed-input";
+        input.placeholder = placeholder;
+        input.setAttribute("list", "participant-suggestions");
+        pairDiv.appendChild(input);
+    });
+    return pairDiv;
 }
 
 async function handleFormSubmit(event) {
-  event.preventDefault();
-  clearError();
+    event.preventDefault();
+    clearError();
 
-  const participants = getParticipantNames();
-  const disallowedPairs = getDisallowedPairs();
-  if (new Set(participants).size !== participants.length) {
-    showError("Each participant needs a unique name.");
-    return;
-  }
-  if (disallowedPairs.some(pair => pair.some(name => !participants.includes(name)))) {
-    showError("Each restriction must use names from the participant list.");
-    return;
-  }
-  const pairings = generatePairings(participants, disallowedPairs);
+    const participants = getParticipantNames();
+    const disallowedPairs = getDisallowedPairs();
+    if (new Set(participants).size !== participants.length) {
+        showError("Each participant needs a unique name.");
+        return;
+    }
+    if (
+        disallowedPairs.some((pair) =>
+            pair.some((name) => !participants.includes(name)),
+        )
+    ) {
+        showError("Each restriction must use names from the participant list.");
+        return;
+    }
+    const pairings = generatePairings(participants, disallowedPairs);
 
-  if (pairings) {
-    const cycleCount = countHamiltonianCycles(participants, disallowedPairs).toString();
-    window.location.href = await stateURL("admin/", {
-      participants,
-      disallowedPairs,
-      pairings,
-      cycleCount
-    });
-    return;
-  }
+    if (pairings) {
+        const cycleCount = countHamiltonianCycles(
+            participants,
+            disallowedPairs,
+        ).toString();
+        window.location.href = await stateURL("admin/", {
+            participants,
+            disallowedPairs,
+            pairings,
+            cycleCount,
+        });
+        return;
+    }
 
-  const totalCycles = countHamiltonianCycles(participants, disallowedPairs);
-  if (totalCycles === 0n) {
-    showError("Unable to generate a valid cycle. Try removing a restriction or adding another participant.");
-  } else {
-    showError("Something went wrong while generating pairings. Please try again.");
-  }
+    const totalCycles = countHamiltonianCycles(participants, disallowedPairs);
+    if (totalCycles === 0n) {
+        showError(
+            "Unable to generate a valid cycle. Try removing a restriction or adding another participant.",
+        );
+    } else {
+        showError(
+            "Something went wrong while generating pairings. Please try again.",
+        );
+    }
 }
 
 export function initSetupPage() {
-  addParticipantButton.addEventListener("click", () => {
-    const input = createParticipantInput();
-    participantList.appendChild(input);
-    input.focus();
-  });
+    addParticipantButton.addEventListener("click", () => {
+        const input = createParticipantInput();
+        participantList.appendChild(input);
+        input.focus();
+    });
 
-  addDisallowedButton.addEventListener("click", () => {
-    const pairDiv = createDisallowedPairFields();
-    disallowedList.appendChild(pairDiv);
-    pairDiv.querySelector("input")?.focus();
-  });
+    addDisallowedButton.addEventListener("click", () => {
+        const pairDiv = createDisallowedPairFields();
+        disallowedList.appendChild(pairDiv);
+        pairDiv.querySelector("input")?.focus();
+    });
 
-  participantList.addEventListener("input", updateGenerateButtonState);
-  participantList.addEventListener("input", updateParticipantSuggestions);
-  setupForm.addEventListener("submit", handleFormSubmit);
-  updateGenerateButtonState();
-  updateParticipantSuggestions();
+    participantList.addEventListener("input", updateGenerateButtonState);
+    participantList.addEventListener("input", updateParticipantSuggestions);
+    setupForm.addEventListener("submit", handleFormSubmit);
+    updateGenerateButtonState();
+    updateParticipantSuggestions();
 }
